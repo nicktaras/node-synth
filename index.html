@@ -1,0 +1,55 @@
+<html>
+
+  <body>
+
+    <button id="play">Play</button>
+    <button id="stop">Stop</button>
+
+    <select id="waveform">
+      <option value="sine">Sine</option>
+      <option value="square">Square</option>
+      <option value="triangle">Triangle</option>
+      <option value="sawtooth" selected>SawTooth</option>
+    </select>
+
+    <script type="text/javascript">
+
+      // Part one generate tone inside broswer.
+
+      // var ac = new AudioContext();
+      // var osc = ac.createOscillator();
+      //
+      // osc.connect(ac.destination);
+      //
+      // osc.start();
+      // osc.stop(2);
+
+      // Part two generate different waveforms inside browser.
+
+      var ac = new AudioContext();
+      var osc = null;
+
+      function playSound()
+      {
+      	osc = ac.createOscillator();
+      	osc.type = document.getElementById('waveform').value;
+
+      	osc.connect(ac.destination);
+
+      	osc.start();
+      }
+
+      function stopSound()
+      {
+      	osc.stop();
+      	osc.disconnect();
+      }
+
+      document.getElementById('play').addEventListener('click', playSound);
+      document.getElementById('stop').addEventListener('click', stopSound);
+
+    </script>
+
+  </body>
+
+</html>

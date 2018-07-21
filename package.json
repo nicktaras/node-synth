@@ -1,0 +1,19 @@
+{
+  "name": "synth",
+  "version": "1.0.0",
+  "description": "A synth made with node.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicktaras/node-synth.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicktaras/node-synth/issues"
+  },
+  "homepage": "https://github.com/nicktaras/node-synth#readme"
+}
