@@ -1,0 +1,110 @@
+<html>
+
+  <body>
+
+    <button id="play">Play</button>
+    <button id="stop">Stop</button>
+
+    <select id="waveform">
+      <option value="sine">Sine</option>
+      <option value="square">Square</option>
+      <option value="triangle">Triangle</option>
+      <option value="sawtooth" selected>SawTooth</option>
+    </select>
+
+    <script type="text/javascript">
+
+      var MAX_FILTER_FREQ_HZ = 6000;
+
+      var ac = new AudioContext();
+      var osc = ac.createOscillator();
+      var osc2 = ac.createOscillator();
+      var osc3 = ac.createOscillator();
+      var gainNode = ac.createGain();
+      var filterNode = ac.createBiquadFilter();
+
+      osc.type = 'sawtooth';
+      osc2.type = 'square';
+      osc3.type = 'sine';
+      // Detune by cents (100 cents in a semitone,
+      // 12 semitones to an octave)
+      osc2.detune.value = 700; // up a seventh
+      osc3.detune.value = -1200; // down one octave
+      gainNode.gain.value = 0;
+      filterNode.type = "lowpass";
+
+      osc.connect(filterNode);
+      osc2.connect(filterNode);
+      osc3.connect(filterNode);
+      filterNode.connect(gainNode);
+      gainNode.connect(ac.destination);
+
+      osc.start();
+      osc2.start();
+      osc3.start();
+
+      if(navigator.requestMIDIAccess)
+      {
+      	navigator.requestMIDIAccess().then(onMIDIInit, onMIDIReject);
+      }
+
+      function onMIDIInit(midiAccess)
+      {
+      	var inputIter = midiAccess.inputs.values();
+      	for(var o = inputIter.next(); !o.done; o = inputIter.next())
+      	{
+      		o.value.onmidimessage = handleMIDIMessageEvent;
+      	}
+      }
+
+      function onMIDIReject() { alert('MIDI Rejected!'); }
+
+      function handleMIDIMessageEvent(event)
+      {
+      	switch(event.data[0] & 0xF0)
+      	{
+      		case 0x90:
+      			if(event.data[2] != 0)
+      			{
+      				noteOn(event.data[1]);
+      				return;
+      			}
+
+      		case 0x80:
+      			noteOff(event.data[1]);
+      			return;
+
+      		case 0xB0: // Control change
+      			setFilter(event.data[2] / 127);
+      			return;
+      	}
+      }
+
+      function setFilter(percent)
+      {
+      	filterNode.frequency.value = percent * MAX_FILTER_FREQ_HZ;
+      }
+
+      function noteOn(noteNumber)
+      {
+      	var freq = frequencyFromNoteNumber(noteNumber);
+      	osc.frequency.setValueAtTime(freq, ac.currentTime);
+      	osc2.frequency.setValueAtTime(freq, ac.currentTime);
+      	osc3.frequency.setValueAtTime(freq, ac.currentTime);
+
+      	gainNode.gain.value = 1;
+      	gainNode.gain.setTargetAtTime(0, ac.currentTime, 0.2);
+      }
+
+      function noteOff(noteNumber) { }
+
+      function frequencyFromNoteNumber( note )
+      {
+      	return 440 * Math.pow(2, (note - 69) / 12);
+      }
+
+  </script>
+
+</body>
+
+</html>
